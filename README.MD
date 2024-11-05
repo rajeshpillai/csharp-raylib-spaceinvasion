@@ -36,24 +36,29 @@ Raylib-cs package
 
 Clone the Repository:
 
-git clone <repository-url>
-cd SpaceInvasionGame
+```dotnetcli
+cd <folder-name>
 
 Install Dependencies:
 
 Install the Raylib-cs NuGet package:
 
-dotnet add package Raylib-cs 
+```dotnet add package Raylib-cs 
+```
+
 
 Build the Project:
 
+```dotnetcli
 dotnet build
+```
 
 Running the Game
 
 After building the project, you can run the game with:
 
-dotnet run
+```dotnet run
+```
 
 Code Structure
 

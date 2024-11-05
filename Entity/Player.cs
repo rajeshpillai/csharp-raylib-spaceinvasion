@@ -1,35 +1,27 @@
+using Raylib_cs;
+using System.Collections.Generic;
+
 namespace SpaceInvasionGame.Entity
 {
-    using Raylib_cs;
-
-    public class Player
+    public class Player : IPlayer
     {
         public int X { get; private set; }
         public int Y { get; private set; }
         private int speed;
-        public Texture2D Texture { get; private set; }
-        private bool moveLeft, moveRight;
+        private Texture2D texture;
 
         public Player(int x, int y, int speed, Texture2D texture)
         {
             X = x;
             Y = y;
             this.speed = speed;
-            Texture = texture;
+            this.texture = texture;
         }
 
-        public void HandleMovement()
+        public void Move()
         {
-            moveLeft = Raylib.IsKeyDown(KeyboardKey.Left);
-            moveRight = Raylib.IsKeyDown(KeyboardKey.Right);
-        }
-
-        public void UpdatePosition()
-        {
-            if (moveLeft)
-                X -= speed;
-            if (moveRight)
-                X += speed;
+            if (Raylib.IsKeyDown(KeyboardKey.Left)) X -= speed;
+            if (Raylib.IsKeyDown(KeyboardKey.Right)) X += speed;
 
             if (X < 0) X = 0;
             if (X > 736) X = 736;
@@ -37,7 +29,12 @@ namespace SpaceInvasionGame.Entity
 
         public void Draw()
         {
-            Raylib.DrawTexture(Texture, X, Y, Color.White);
+            Raylib.DrawTexture(texture, X, Y, Color.White);
+        }
+
+        public void Shoot(List<Bullet> bullets, Texture2D bulletTexture)
+        {
+            bullets.Add(new Bullet(X + 28, Y, bulletTexture));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace SpaceInvasionGame {
     {
         private const int WindowWidth = 800;
         private const int WindowHeight = 600;
-        private Player player;
+        private IPlayer player;
         private List<Enemy> enemies;
         private List<Bullet> bullets;
         private Random random;
@@ -19,6 +19,7 @@ namespace SpaceInvasionGame {
         private Texture2D background;
         private Texture2D enemyTexture;
         private Texture2D bulletTexture;
+        private Texture2D shieldTexture;
 
         public SpaceInvasionGame()
         {
@@ -30,17 +31,22 @@ namespace SpaceInvasionGame {
             Texture2D playerTexture = Raylib.LoadTexture("images/player.png");
             enemyTexture = Raylib.LoadTexture("images/enemy.png");
             bulletTexture = Raylib.LoadTexture("images/bullet.png");
+            shieldTexture = Raylib.LoadTexture("images/shield.png");
 
             player = new Player(370, 480, 3, playerTexture);
+            // Add shield to player with Decorator pattern
+            player = new ShieldDecorator(player, shieldTexture);
+
             enemies = new List<Enemy>();
             bullets = new List<Bullet>();
             random = new Random();
             score = 0;
             gameOver = false;
 
+            IEntityFactory enemyFactory = new EnemyFactory(enemyTexture, random);
             for (int i = 0; i < 6; i++)
             {
-                enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture));
+                enemies.Add((Enemy)enemyFactory.Create());
             }
         }
 
@@ -53,19 +59,17 @@ namespace SpaceInvasionGame {
                 Render();
             }
 
-            // Unload textures
             Raylib.UnloadTexture(background);
-            Raylib.UnloadTexture(player.Texture);
             Raylib.UnloadTexture(enemyTexture);
             Raylib.UnloadTexture(bulletTexture);
-
+            Raylib.UnloadTexture(shieldTexture);
             Raylib.CloseWindow();
         }
 
         private void HandleEvents()
         {
-            player.HandleMovement();
-            
+            player.Move();
+
             if (Raylib.IsKeyPressed(KeyboardKey.Space) && !gameOver)
             {
                 bullets.Add(new Bullet(player.X + 28, player.Y, bulletTexture));
@@ -76,16 +80,12 @@ namespace SpaceInvasionGame {
         {
             if (gameOver) return;
 
-            player.UpdatePosition();
-
-            // Bullet movement
             foreach (Bullet bullet in bullets)
             {
                 bullet.Move();
             }
             bullets.RemoveAll(b => b.Y < 0);
 
-            // Enemy movement
             foreach (Enemy enemy in enemies)
             {
                 enemy.Move();
@@ -95,7 +95,6 @@ namespace SpaceInvasionGame {
                 }
             }
 
-            // Bullet-enemy collision detection
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 for (int j = bullets.Count - 1; j >= 0; j--)
@@ -105,7 +104,8 @@ namespace SpaceInvasionGame {
                         enemies.RemoveAt(i);
                         bullets.RemoveAt(j);
                         score++;
-                        enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture));
+                        enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture, new ZigZagMovement()));
+
                         break;
                     }
                 }

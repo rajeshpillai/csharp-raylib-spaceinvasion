@@ -1,84 +1,120 @@
 # Space Invasion Game
 
-## Overview
+This project is a Space Invasion game built using C# and Raylib. The game demonstrates various design patterns such as **Factory**, **Strategy**, and **Decorator** to enhance code modularity, flexibility, and readability. 
 
-The Space Invasion Game is a simple 2D shooter game built in C# using the Raylib library. In this game, you control a player spaceship that must shoot down enemies while avoiding their approach. The game runs in a graphical window and features enemy movement, player movement, bullet shooting, and score tracking. If the enemies get too close, the game ends.
+## Game Overview
 
-## Features
+In Space Invasion, the player controls a spaceship to shoot incoming enemies. Each enemy moves in a particular pattern, and the player can collect a power-up that provides a temporary shield around their ship. The game also keeps score based on the number of enemies destroyed.
 
-Player Movement: Control the spaceship using the Left and Right arrow keys.
+## Code Structure
 
-Enemy Movement: Enemies move across the screen and descend after reaching the edge.
+The code is organized into separate files for each entity and pattern implementation:
 
-Shooting Bullets: Shoot bullets to destroy enemies using the Space key.
 
-Score Tracking: The game keeps track of the player's score.
+## Design Patterns Used
 
-Game Over: The game ends when enemies reach the bottom of the screen.
+### 1. Factory Pattern
 
-## Controls
+**Purpose**: The Factory pattern is used to encapsulate the creation of game entities (like `Enemy` and `Bullet`). This approach allows the main game logic to request new entities without needing to know the specifics of how they're created.
 
-Left Arrow Key: Move the player to the left.
+**Implementation**:
+- `IEntityFactory` interface defines a `Create` method that returns a `GameEntity`.
+- `EnemyFactory` and `BulletFactory` implement `IEntityFactory` and create instances of `Enemy` and `Bullet` respectively.
+  
+**Usage**:
+```csharp
+IEntityFactory enemyFactory = new EnemyFactory(enemyTexture, random);
+enemies.Add((Enemy)enemyFactory.Create());
 
-Right Arrow Key: Move the player to the right.
+When Applied: This pattern is applied whenever a new game entity (like an Enemy) needs to be created. It allows for easy extension to add new types of enemies without changing the core game logic.
+2. Strategy Pattern
 
-Space Key: Shoot bullets.
+Purpose: The Strategy pattern defines different movement behaviors for enemies, enabling them to move in varied ways (e.g., zigzag, straight). This helps decouple movement logic from the enemy class and allows new behaviors to be added easily.
 
-## Prerequisites
+Implementation:
 
-To run this game, you need:
+    - IMovementStrategy interface defines a Move method.
+    - StraightMovement and ZigZagMovement classes implement IMovementStrategy and provide specific movement behaviors.
+    - Enemy class accepts an IMovementStrategy instance and delegates its Move method to the strategy.
 
-.NET SDK (6.0 or higher)
-
-Raylib-cs package
-
-## Installation
-
-Clone the Repository:
-
+```IMovementStrategy zigzagStrategy = new ZigZagMovement();
+enemies.Add(new Enemy(randomX, randomY, speedX, speedY, enemyTexture, zigzagStrategy));
 ```dotnetcli
-cd <folder-name>
 
-Install Dependencies:
+When Applied: This pattern is applied when creating an Enemy. By injecting different movement strategies, we can change how each enemy behaves without altering the Enemy class itself.
+3. Decorator Pattern
 
-Install the Raylib-cs NuGet package:
+Purpose: The Decorator pattern adds extra functionality to the player (like a shield) without altering the Player class. This allows the player to gain temporary power-ups that modify behavior.
 
+Implementation:
+
+    IPlayer interface defines basic player actions.
+    Player class implements IPlayer, providing default player behavior.
+    ShieldDecorator wraps a Player instance, adding a shield that activates for a limited time.
+
+Usage:
+
+```IPlayer player = new Player(initialX, initialY, playerSpeed, playerTexture);
+player = new ShieldDecorator(player, shieldTexture);
 ```dotnetcli
-dotnet add package Raylib-cs 
-```
 
-Build the Project:
+When Applied: This pattern is applied when the player gains a power-up. By using the ShieldDecorator, we can add shield functionality dynamically, allowing the player to become temporarily invincible.
 
+## Detailed Code Explanation
+Main Game Logic (Program.cs)
+
+    Initialization: The game window is set up, and textures are loaded. The player and enemies are created using the Factory pattern.
+    Event Handling: Player input is managed to control movement and shooting.
+    Game Update: The player, bullets, and enemies are updated. Bullet-enemy collisions are checked, and the score is increased when an enemy is hit.
+    Render: All entities are drawn to the screen, and the score and "Game Over" message are displayed if applicable.
+
+Collision Detection in Enemy
+
+The Enemy class includes an Intersects method to check for collisions with bullets:
+
+```public bool Intersects(Bullet bullet)
+{
+    Rectangle enemyRect = new Rectangle(X, Y, Texture.width, Texture.height);
+    Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.width, bullet.Texture.height);
+    return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
+}
 ```dotnetcli
+
+This method creates rectangles for both the enemy and the bullet based on their positions and dimensions. Raylib.CheckCollisionRecs checks if these rectangles intersect, indicating a collision.
+
+## Shield Power-Up with ShieldDecorator
+
+The ShieldDecorator wraps the Player object, adding a temporary shield that can be activated for a limited duration:
+
+```public void ActivateShield()
+{
+    shieldActive = true;
+    shieldActivatedTime = DateTime.Now;
+}
+
+private void CheckShieldStatus()
+{
+    if (shieldActive && (DateTime.Now - shieldActivatedTime).TotalSeconds >= shieldDuration)
+    {
+        shieldActive = false;
+    }
+}
+```dotnetcli
+
+The shield is activated by calling ActivateShield, and CheckShieldStatus automatically deactivates it after the specified duration.
+How to Run
+
+    Ensure you have .NET and Raylib installed.
+    Clone the repository and navigate to the project directory.
+    Run the following commands:
+
+```dotnet restore
 dotnet build
-```
-
-Running the Game
-
-After building the project, you can run the game with:
-
-```
 dotnet run
-```
+```bash
 
-Code Structure
+# Conclusion
 
-SpaceInvasionGame: The main game class that initializes the window, handles player input, updates game states, and renders graphics.
+This Space Invasion game showcases how design patterns can improve the modularity, flexibility, and extensibility of game code. By using Factory, Strategy, and Decorator patterns, we enable dynamic entity creation, customizable behaviors, and the ability to add temporary power-ups easily.
 
-Enemy: Represents an enemy in the game. Handles movement and collision detection.
 
-Bullet: Represents a bullet fired by the player. Handles movement and rendering.
-
-## Gameplay
-
-The player controls a triangular spaceship at the bottom of the screen, which can move left and right. Enemies move across the screen and descend after reaching the edges. The player can shoot bullets to destroy enemies, and each destroyed enemy increases the score. If an enemy reaches the bottom of the screen, the game ends.
-
-## License
-
-This game is open-source and available under the MIT License.
-
-## Acknowledgements
-
-Built with Raylib and Raylib-cs.
-
-Inspired by classic arcade space shooter games.

@@ -2,42 +2,30 @@ namespace SpaceInvasionGame.Entity
 {
     using Raylib_cs;
 
-    public class Enemy
+    public class Enemy : GameEntity
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        private int speedX;
-        private int speedY;
-        private bool movingRight = true;
-        private Texture2D texture;
+        public int SpeedX { get; set; }
+        public int SpeedY { get; set; }
+        public bool MovingRight { get; set; } = true;
+        private IMovementStrategy movementStrategy;
 
-        public Enemy(int x, int y, int speedX, int speedY, Texture2D texture)
+        public Enemy(int x, int y, int speedX, int speedY, Texture2D texture, IMovementStrategy strategy)
+            : base(x, y, texture)
         {
-            X = x;
-            Y = y;
-            this.speedX = speedX;
-            this.speedY = speedY;
-            this.texture = texture;
+            SpeedX = speedX;
+            SpeedY = speedY;
+            movementStrategy = strategy;
         }
 
-        public void Move()
+        public override void Move()
         {
-            X += movingRight ? speedX : -speedX;
-            if (X <= 0 || X >= 736)
-            {
-                movingRight = !movingRight;
-                Y += speedY;
-            }
+            movementStrategy.Move(this);
         }
 
-        public void Draw()
-        {
-            Raylib.DrawTexture(texture, X, Y, Color.White);
-        }
-
+        // Collision detection between this enemy and a bullet
         public bool Intersects(Bullet bullet)
         {
-            Rectangle enemyRect = new Rectangle(X, Y, texture.Width, texture.Height);
+            Rectangle enemyRect = new Rectangle(X, Y, Texture.Width, Texture.Height);
             Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.Width, bullet.Texture.Height);
             return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
         }

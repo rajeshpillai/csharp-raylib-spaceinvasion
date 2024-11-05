@@ -16,10 +16,22 @@ public class SpaceInvasionGame
     private int score;
     private bool gameOver;
 
+    // Load textures
+    private Texture2D background;
+    private Texture2D playerTexture;
+    private Texture2D enemyTexture;
+    private Texture2D bulletTexture;
+
     public SpaceInvasionGame()
     {
         Raylib.InitWindow(WindowWidth, WindowHeight, "Space Invasion");
         Raylib.SetTargetFPS(60);
+
+        // Load assets
+        background = Raylib.LoadTexture("images/background.jpg");
+        playerTexture = Raylib.LoadTexture("images/player.png");
+        enemyTexture = Raylib.LoadTexture("images/enemy.png");
+        bulletTexture = Raylib.LoadTexture("images/bullet.png");
 
         enemies = new List<Enemy>();
         bullets = new List<Bullet>();
@@ -29,7 +41,7 @@ public class SpaceInvasionGame
 
         for (int i = 0; i < 6; i++)
         {
-            enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40));
+            enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 4, 40, enemyTexture));
         }
     }
 
@@ -41,6 +53,12 @@ public class SpaceInvasionGame
             UpdateGame();
             Render();
         }
+
+        // Unload textures
+        Raylib.UnloadTexture(background);
+        Raylib.UnloadTexture(playerTexture);
+        Raylib.UnloadTexture(enemyTexture);
+        Raylib.UnloadTexture(bulletTexture);
 
         Raylib.CloseWindow();
     }
@@ -59,7 +77,7 @@ public class SpaceInvasionGame
 
         if (Raylib.IsKeyPressed(KeyboardKey.Space) && !gameOver)
         {
-            bullets.Add(new Bullet(playerX + 28, playerY));
+            bullets.Add(new Bullet(playerX + 28, playerY, bulletTexture));
         }
     }
 
@@ -106,7 +124,7 @@ public class SpaceInvasionGame
                     enemies.RemoveAt(i);
                     bullets.RemoveAt(j);
                     score++;
-                    enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40));
+                    enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 4, 40, enemyTexture));
                     break;
                 }
             }
@@ -118,11 +136,11 @@ public class SpaceInvasionGame
         Raylib.BeginDrawing();
         Raylib.ClearBackground(Color.Black);
 
+        // Draw background
+        Raylib.DrawTexture(background, 0, 0, Color.White);
+
         // Draw player
-        Raylib.DrawTriangle(new System.Numerics.Vector2(playerX + 32, playerY),
-                            new System.Numerics.Vector2(playerX, playerY + 64),
-                            new System.Numerics.Vector2(playerX + 64, playerY + 64),
-                            Color.Green);
+        Raylib.DrawTexture(playerTexture, playerX, playerY, Color.White);
 
         // Draw enemies
         foreach (Enemy enemy in enemies)
@@ -160,13 +178,15 @@ public class Enemy
     private int speedX;
     private int speedY;
     private bool movingRight = true;
+    private Texture2D texture;
 
-    public Enemy(int x, int y, int speedX, int speedY)
+    public Enemy(int x, int y, int speedX, int speedY, Texture2D texture)
     {
         X = x;
         Y = y;
         this.speedX = speedX;
         this.speedY = speedY;
+        this.texture = texture;
     }
 
     public void Move()
@@ -185,13 +205,13 @@ public class Enemy
 
     public void Draw()
     {
-        Raylib.DrawRectangle(X, Y, 64, 64, Color.Red);
+        Raylib.DrawTexture(texture, X, Y, Color.White);
     }
 
     public bool Intersects(Bullet bullet)
     {
-        Rectangle enemyRect = new Rectangle(X, Y, 64, 64);
-        Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, 8, 20);
+        Rectangle enemyRect = new Rectangle(X, Y, texture.Width, texture.Height);
+        Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.Width, bullet.Texture.Height);
         return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
     }
 }
@@ -201,11 +221,13 @@ public class Bullet
     public int X { get; private set; }
     public int Y { get; private set; }
     private int speedY = 6;
+    public Texture2D Texture { get; private set; }
 
-    public Bullet(int x, int y)
+    public Bullet(int x, int y, Texture2D texture)
     {
         X = x;
         Y = y;
+        Texture = texture;
     }
 
     public void Move()
@@ -215,6 +237,6 @@ public class Bullet
 
     public void Draw()
     {
-        Raylib.DrawRectangle(X, Y, 8, 20, Color.Yellow);
+        Raylib.DrawTexture(Texture, X, Y, Color.White);
     }
 }

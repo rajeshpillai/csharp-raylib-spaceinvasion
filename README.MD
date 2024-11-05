@@ -43,9 +43,9 @@ Install Dependencies:
 
 Install the Raylib-cs NuGet package:
 
-```dotnet add package Raylib-cs 
+```dotnetcli
+dotnet add package Raylib-cs 
 ```
-
 
 Build the Project:
 
@@ -57,7 +57,8 @@ Running the Game
 
 After building the project, you can run the game with:
 
-```dotnet run
+```
+dotnet run
 ```
 
 Code Structure
@@ -68,15 +69,15 @@ Enemy: Represents an enemy in the game. Handles movement and collision detection
 
 Bullet: Represents a bullet fired by the player. Handles movement and rendering.
 
-Gameplay
+## Gameplay
 
 The player controls a triangular spaceship at the bottom of the screen, which can move left and right. Enemies move across the screen and descend after reaching the edges. The player can shoot bullets to destroy enemies, and each destroyed enemy increases the score. If an enemy reaches the bottom of the screen, the game ends.
 
-License
+## License
 
 This game is open-source and available under the MIT License.
 
-Acknowledgements
+## Acknowledgements
 
 Built with Raylib and Raylib-cs.
 

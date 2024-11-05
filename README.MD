@@ -25,23 +25,26 @@ The code is organized into separate files for each entity and pattern implementa
 ```csharp
 IEntityFactory enemyFactory = new EnemyFactory(enemyTexture, random);
 enemies.Add((Enemy)enemyFactory.Create());
+```
 
 When Applied: This pattern is applied whenever a new game entity (like an Enemy) needs to be created. It allows for easy extension to add new types of enemies without changing the core game logic.
+
 2. Strategy Pattern
 
 Purpose: The Strategy pattern defines different movement behaviors for enemies, enabling them to move in varied ways (e.g., zigzag, straight). This helps decouple movement logic from the enemy class and allows new behaviors to be added easily.
 
 Implementation:
+  - IMovementStrategy interface defines a Move method.
+  - StraightMovement and ZigZagMovement classes implement IMovementStrategy and provide specific movement behaviors.
+  - Enemy class accepts an IMovementStrategy instance and delegates its Move method to the strategy.
 
-    - IMovementStrategy interface defines a Move method.
-    - StraightMovement and ZigZagMovement classes implement IMovementStrategy and provide specific movement behaviors.
-    - Enemy class accepts an IMovementStrategy instance and delegates its Move method to the strategy.
-
-```IMovementStrategy zigzagStrategy = new ZigZagMovement();
+```dotnetcli 
+IMovementStrategy zigzagStrategy = new ZigZagMovement();
 enemies.Add(new Enemy(randomX, randomY, speedX, speedY, enemyTexture, zigzagStrategy));
-```dotnetcli
+```
 
 When Applied: This pattern is applied when creating an Enemy. By injecting different movement strategies, we can change how each enemy behaves without altering the Enemy class itself.
+
 3. Decorator Pattern
 
 Purpose: The Decorator pattern adds extra functionality to the player (like a shield) without altering the Player class. This allows the player to gain temporary power-ups that modify behavior.
@@ -54,9 +57,9 @@ Implementation:
 
 Usage:
 
-```IPlayer player = new Player(initialX, initialY, playerSpeed, playerTexture);
+```dotnetcli IPlayer player = new Player(initialX, initialY, playerSpeed, playerTexture);
 player = new ShieldDecorator(player, shieldTexture);
-```dotnetcli
+```
 
 When Applied: This pattern is applied when the player gains a power-up. By using the ShieldDecorator, we can add shield functionality dynamically, allowing the player to become temporarily invincible.
 
@@ -72,13 +75,14 @@ Collision Detection in Enemy
 
 The Enemy class includes an Intersects method to check for collisions with bullets:
 
-```public bool Intersects(Bullet bullet)
+```dotnetcli
+public bool Intersects(Bullet bullet)
 {
     Rectangle enemyRect = new Rectangle(X, Y, Texture.width, Texture.height);
     Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.width, bullet.Texture.height);
     return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
 }
-```dotnetcli
+```
 
 This method creates rectangles for both the enemy and the bullet based on their positions and dimensions. Raylib.CheckCollisionRecs checks if these rectangles intersect, indicating a collision.
 
@@ -86,7 +90,8 @@ This method creates rectangles for both the enemy and the bullet based on their 
 
 The ShieldDecorator wraps the Player object, adding a temporary shield that can be activated for a limited duration:
 
-```public void ActivateShield()
+```dotnetcli 
+public void ActivateShield()
 {
     shieldActive = true;
     shieldActivatedTime = DateTime.Now;
@@ -99,7 +104,7 @@ private void CheckShieldStatus()
         shieldActive = false;
     }
 }
-```dotnetcli
+```
 
 The shield is activated by calling ActivateShield, and CheckShieldStatus automatically deactivates it after the specified duration.
 How to Run
@@ -108,10 +113,11 @@ How to Run
     Clone the repository and navigate to the project directory.
     Run the following commands:
 
-```dotnet restore
+```dotnetcli
+dotnet restore
 dotnet build
 dotnet run
-```bash
+```
 
 # Conclusion
 

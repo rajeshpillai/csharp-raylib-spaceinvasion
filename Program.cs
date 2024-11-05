@@ -1,242 +1,149 @@
 ﻿using System;
 using System.Collections.Generic;
 using Raylib_cs;
+using SpaceInvasionGame.Entity;
 
-public class SpaceInvasionGame
-{
-    private const int WindowWidth = 800;
-    private const int WindowHeight = 600;
-    private int playerX = 370;
-    private int playerY = 480;
-    private int playerSpeed = 3;
-    private bool moveLeft, moveRight;
-    private List<Enemy> enemies;
-    private List<Bullet> bullets;
-    private Random random;
-    private int score;
-    private bool gameOver;
-
-    // Load textures
-    private Texture2D background;
-    private Texture2D playerTexture;
-    private Texture2D enemyTexture;
-    private Texture2D bulletTexture;
-
-    public SpaceInvasionGame()
+namespace SpaceInvasionGame {
+    public class SpaceInvasionGame
     {
-        Raylib.InitWindow(WindowWidth, WindowHeight, "Space Invasion");
-        Raylib.SetTargetFPS(60);
+        private const int WindowWidth = 800;
+        private const int WindowHeight = 600;
+        private Player player;
+        private List<Enemy> enemies;
+        private List<Bullet> bullets;
+        private Random random;
+        private int score;
+        private bool gameOver;
 
-        // Load assets
-        background = Raylib.LoadTexture("images/background.jpg");
-        playerTexture = Raylib.LoadTexture("images/player.png");
-        enemyTexture = Raylib.LoadTexture("images/enemy.png");
-        bulletTexture = Raylib.LoadTexture("images/bullet.png");
+        // Load textures
+        private Texture2D background;
+        private Texture2D enemyTexture;
+        private Texture2D bulletTexture;
 
-        enemies = new List<Enemy>();
-        bullets = new List<Bullet>();
-        random = new Random();
-        score = 0;
-        gameOver = false;
-
-        for (int i = 0; i < 6; i++)
+        public SpaceInvasionGame()
         {
-            enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 4, 40, enemyTexture));
-        }
-    }
+            Raylib.InitWindow(WindowWidth, WindowHeight, "Space Invasion");
+            Raylib.SetTargetFPS(60);
 
-    public void Run()
-    {
-        while (!Raylib.WindowShouldClose())
-        {
-            HandleEvents();
-            UpdateGame();
-            Render();
-        }
+            // Load assets
+            background = Raylib.LoadTexture("images/background.jpg");
+            Texture2D playerTexture = Raylib.LoadTexture("images/player.png");
+            enemyTexture = Raylib.LoadTexture("images/enemy.png");
+            bulletTexture = Raylib.LoadTexture("images/bullet.png");
 
-        // Unload textures
-        Raylib.UnloadTexture(background);
-        Raylib.UnloadTexture(playerTexture);
-        Raylib.UnloadTexture(enemyTexture);
-        Raylib.UnloadTexture(bulletTexture);
+            player = new Player(370, 480, 3, playerTexture);
+            enemies = new List<Enemy>();
+            bullets = new List<Bullet>();
+            random = new Random();
+            score = 0;
+            gameOver = false;
 
-        Raylib.CloseWindow();
-    }
-
-    private void HandleEvents()
-    {
-        if (Raylib.IsKeyDown(KeyboardKey.Left))
-            moveLeft = true;
-        else
-            moveLeft = false;
-
-        if (Raylib.IsKeyDown(KeyboardKey.Right))
-            moveRight = true;
-        else
-            moveRight = false;
-
-        if (Raylib.IsKeyPressed(KeyboardKey.Space) && !gameOver)
-        {
-            bullets.Add(new Bullet(playerX + 28, playerY, bulletTexture));
-        }
-    }
-
-    private void UpdateGame()
-    {
-        if (gameOver)
-            return;
-
-        // Player movement
-        if (moveLeft)
-            playerX -= playerSpeed;
-        if (moveRight)
-            playerX += playerSpeed;
-
-        if (playerX < 0)
-            playerX = 0;
-        if (playerX > 736)
-            playerX = 736;
-
-        // Bullet movement
-        foreach (Bullet bullet in bullets)
-        {
-            bullet.Move();
-        }
-        bullets.RemoveAll(b => b.Y < 0);
-
-        // Enemy movement
-        foreach (Enemy enemy in enemies)
-        {
-            enemy.Move();
-            if (enemy.Y > 440)
+            for (int i = 0; i < 6; i++)
             {
-                gameOver = true;
+                enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture));
             }
         }
 
-        // Bullet-enemy collision detection
-        for (int i = enemies.Count - 1; i >= 0; i--)
+        public void Run()
         {
-            for (int j = bullets.Count - 1; j >= 0; j--)
+            while (!Raylib.WindowShouldClose())
             {
-                if (enemies[i].Intersects(bullets[j]))
+                HandleEvents();
+                UpdateGame();
+                Render();
+            }
+
+            // Unload textures
+            Raylib.UnloadTexture(background);
+            Raylib.UnloadTexture(player.Texture);
+            Raylib.UnloadTexture(enemyTexture);
+            Raylib.UnloadTexture(bulletTexture);
+
+            Raylib.CloseWindow();
+        }
+
+        private void HandleEvents()
+        {
+            player.HandleMovement();
+            
+            if (Raylib.IsKeyPressed(KeyboardKey.Space) && !gameOver)
+            {
+                bullets.Add(new Bullet(player.X + 28, player.Y, bulletTexture));
+            }
+        }
+
+        private void UpdateGame()
+        {
+            if (gameOver) return;
+
+            player.UpdatePosition();
+
+            // Bullet movement
+            foreach (Bullet bullet in bullets)
+            {
+                bullet.Move();
+            }
+            bullets.RemoveAll(b => b.Y < 0);
+
+            // Enemy movement
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Move();
+                if (enemy.Y > 440)
                 {
-                    enemies.RemoveAt(i);
-                    bullets.RemoveAt(j);
-                    score++;
-                    enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 4, 40, enemyTexture));
-                    break;
+                    gameOver = true;
+                }
+            }
+
+            // Bullet-enemy collision detection
+            for (int i = enemies.Count - 1; i >= 0; i--)
+            {
+                for (int j = bullets.Count - 1; j >= 0; j--)
+                {
+                    if (enemies[i].Intersects(bullets[j]))
+                    {
+                        enemies.RemoveAt(i);
+                        bullets.RemoveAt(j);
+                        score++;
+                        enemies.Add(new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture));
+                        break;
+                    }
                 }
             }
         }
-    }
 
-    private void Render()
-    {
-        Raylib.BeginDrawing();
-        Raylib.ClearBackground(Color.Black);
-
-        // Draw background
-        Raylib.DrawTexture(background, 0, 0, Color.White);
-
-        // Draw player
-        Raylib.DrawTexture(playerTexture, playerX, playerY, Color.White);
-
-        // Draw enemies
-        foreach (Enemy enemy in enemies)
+        private void Render()
         {
-            enemy.Draw();
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
+
+            Raylib.DrawTexture(background, 0, 0, Color.White);
+            player.Draw();
+
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Draw();
+            }
+
+            foreach (Bullet bullet in bullets)
+            {
+                bullet.Draw();
+            }
+
+            Raylib.DrawText($"Score: {score}", 10, 10, 20, Color.White);
+
+            if (gameOver)
+            {
+                Raylib.DrawText("GAME OVER", 250, 250, 32, Color.White);
+            }
+
+            Raylib.EndDrawing();
         }
 
-        // Draw bullets
-        foreach (Bullet bullet in bullets)
+        public static void Main()
         {
-            bullet.Draw();
+            var game = new SpaceInvasionGame();
+            game.Run();
         }
-
-        Raylib.DrawText($"Score: {score}", 10, 10, 20, Color.White);
-
-        if (gameOver)
-        {
-            Raylib.DrawText("GAME OVER", 250, 250, 32, Color.White);
-        }
-
-        Raylib.EndDrawing();
-    }
-
-    public static void Main()
-    {
-        var game = new SpaceInvasionGame();
-        game.Run();
-    }
-}
-
-public class Enemy
-{
-    public int X { get; set; }
-    public int Y { get; set; }
-    private int speedX;
-    private int speedY;
-    private bool movingRight = true;
-    private Texture2D texture;
-
-    public Enemy(int x, int y, int speedX, int speedY, Texture2D texture)
-    {
-        X = x;
-        Y = y;
-        this.speedX = speedX;
-        this.speedY = speedY;
-        this.texture = texture;
-    }
-
-    public void Move()
-    {
-        if (movingRight)
-            X += speedX;
-        else
-            X -= speedX;
-
-        if (X <= 0 || X >= 736)
-        {
-            movingRight = !movingRight;
-            Y += speedY;
-        }
-    }
-
-    public void Draw()
-    {
-        Raylib.DrawTexture(texture, X, Y, Color.White);
-    }
-
-    public bool Intersects(Bullet bullet)
-    {
-        Rectangle enemyRect = new Rectangle(X, Y, texture.Width, texture.Height);
-        Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.Width, bullet.Texture.Height);
-        return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
-    }
-}
-
-public class Bullet
-{
-    public int X { get; private set; }
-    public int Y { get; private set; }
-    private int speedY = 6;
-    public Texture2D Texture { get; private set; }
-
-    public Bullet(int x, int y, Texture2D texture)
-    {
-        X = x;
-        Y = y;
-        Texture = texture;
-    }
-
-    public void Move()
-    {
-        Y -= speedY;
-    }
-
-    public void Draw()
-    {
-        Raylib.DrawTexture(Texture, X, Y, Color.White);
     }
 }

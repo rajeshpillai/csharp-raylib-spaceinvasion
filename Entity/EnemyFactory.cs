@@ -16,7 +16,24 @@ namespace SpaceInvasionGame.Entity
 
         public GameEntity Create()
         {
-            return new Enemy(random.Next(0, 736), random.Next(50, 150), 2, 40, enemyTexture, new ZigZagMovement());
+            return new Enemy(
+                random.Next(0, 736),
+                random.Next(50, 150),
+                2,
+                40,
+                enemyTexture,
+                CreateRandomStrategy());
+        }
+
+        // The factory decides which movement behaviour each enemy gets.
+        private IMovementStrategy CreateRandomStrategy()
+        {
+            switch (random.Next(3))
+            {
+                case 0: return new StraightDiveMovement();
+                case 1: return new SineWaveMovement();
+                default: return new ZigZagMovement();
+            }
         }
     }
 }

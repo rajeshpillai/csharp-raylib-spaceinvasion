@@ -8,6 +8,9 @@ namespace SpaceInvasionGame.Entity
         public int Y { get; set; }
         public Texture2D Texture { get; protected set; }
 
+        // Axis-aligned bounding box used for collision checks.
+        public Rectangle Bounds => new Rectangle(X, Y, Texture.Width, Texture.Height);
+
         public GameEntity(int x, int y, Texture2D texture)
         {
             X = x;

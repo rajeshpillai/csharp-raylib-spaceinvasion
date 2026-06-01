@@ -1,5 +1,4 @@
 using Raylib_cs;
-using System;
 using System.Collections.Generic;
 
 namespace SpaceInvasionGame.Entity
@@ -10,10 +9,20 @@ namespace SpaceInvasionGame.Entity
         private Texture2D shieldTexture;
         private bool shieldActive;
         private float shieldDuration;
-        private DateTime shieldActivatedTime;
+        private double shieldActivatedTime;
 
         public int X => player.X;
         public int Y => player.Y;
+
+        // Lets the game logic ask whether the player is currently protected.
+        public bool IsShieldActive
+        {
+            get
+            {
+                CheckShieldStatus();
+                return shieldActive;
+            }
+        }
 
         public ShieldDecorator(IPlayer player, Texture2D shieldTexture, float duration = 5.0f)
         {
@@ -26,12 +35,12 @@ namespace SpaceInvasionGame.Entity
         public void ActivateShield()
         {
             shieldActive = true;
-            shieldActivatedTime = DateTime.Now;
+            shieldActivatedTime = Raylib.GetTime();
         }
 
         private void CheckShieldStatus()
         {
-            if (shieldActive && (DateTime.Now - shieldActivatedTime).TotalSeconds >= shieldDuration)
+            if (shieldActive && (Raylib.GetTime() - shieldActivatedTime) >= shieldDuration)
             {
                 shieldActive = false;
             }

@@ -22,12 +22,10 @@ namespace SpaceInvasionGame.Entity
             movementStrategy.Move(this);
         }
 
-        // Collision detection between this enemy and a bullet
-        public bool Intersects(Bullet bullet)
+        // Collision detection between this enemy and any other entity.
+        public bool Intersects(GameEntity other)
         {
-            Rectangle enemyRect = new Rectangle(X, Y, Texture.Width, Texture.Height);
-            Rectangle bulletRect = new Rectangle(bullet.X, bullet.Y, bullet.Texture.Width, bullet.Texture.Height);
-            return Raylib.CheckCollisionRecs(enemyRect, bulletRect);
+            return Raylib.CheckCollisionRecs(Bounds, other.Bounds);
         }
     }
 }

@@ -1,5 +1,11 @@
 # Space Invasion Game
 
+> **Updated version available:** An enhanced version of this code lives in the [`feat-enhancements`](../../tree/feat-enhancements) branch. It includes bug fixes and additional features (collision-based game over, multiple enemy movement strategies, a working activatable shield, enemy respawning via the factory, and a restart option). Check out that branch for the latest code:
+>
+> ```bash
+> git checkout feat-enhancements
+> ```
+
 This project is a Space Invasion game built using C# and Raylib. The game demonstrates various design patterns such as **Factory**, **Strategy**, and **Decorator** to enhance code modularity, flexibility, and readability. 
 
 ## Game Overview
